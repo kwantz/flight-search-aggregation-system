@@ -21,16 +21,34 @@ func New() *batikair {
 }
 
 func (a *batikair) Search(ctx context.Context) ([]entity.Flight, error) {
-	// Next: add retry + exponential backoff
-	// Next: add timeout with context
+	retry := 3
 
-	resp, err := a.httpPost(ctx)
+	resp, err := a.httpPostWithRetry(ctx, retry)
 	if err != nil {
 		log.Printf("[ERROR][domain/batikair][Search] failed httpPost, err: %s", err.Error())
 		return nil, err
 	}
 
 	return a.toFlightEntity(ctx, resp), nil
+}
+
+func (a *batikair) httpPostWithRetry(ctx context.Context, retry int) (FlightResponse, error) {
+	var res FlightResponse
+	var err error
+
+	delay := time.Duration(100 * time.Millisecond)
+
+	for attempt := 0; attempt < retry; attempt++ {
+		res, err = a.httpPost(ctx)
+		if err == nil {
+			return res, nil
+		}
+
+		time.Sleep(delay)
+		delay *= 2
+	}
+
+	return FlightResponse{}, err
 }
 
 func (*batikair) httpPost(ctx context.Context) (FlightResponse, error) {

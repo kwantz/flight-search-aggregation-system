@@ -17,6 +17,7 @@ type Flight struct {
 	Aircraft       *string        `json:"aircraft"`
 	Amenities      []string       `json:"amenities"`
 	Baggage        Baggage        `json:"baggage"`
+	Rank           float64        `json:"rank"`
 }
 
 type Airline struct {

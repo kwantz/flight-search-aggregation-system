@@ -75,3 +75,20 @@ Content-Type: application/json
         "arrival": "desc"
     }
 }
+
+##### Invalid Request ##############################
+
+POST http://localhost:3000/api/v1/flight/search
+Content-Type: application/json
+
+{
+    "origin": "", 
+    "destination": "DPS", 
+    "departure_date": "2025-12-15", 
+    "return_date": null, 
+    "passengers": 1, 
+    "cabin_class": "economy",
+    "sort_by": {
+        "arrival": "desc"
+    }
+}

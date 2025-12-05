@@ -21,10 +21,9 @@ func New() *garuda {
 }
 
 func (a *garuda) Search(ctx context.Context) ([]entity.Flight, error) {
-	// Next: add retry + exponential backoff
-	// Next: add timeout with context
+	retry := 3
 
-	resp, err := a.httpPost(ctx)
+	resp, err := a.httpPostWithRetry(ctx, retry)
 	if err != nil {
 		log.Printf("[ERROR][domain/garuda][Search] failed httpPost, err: %s", err.Error())
 		return nil, err
@@ -37,6 +36,25 @@ func (a *garuda) Search(ctx context.Context) ([]entity.Flight, error) {
 	}
 
 	return flights, nil
+}
+
+func (a *garuda) httpPostWithRetry(ctx context.Context, retry int) (FlightResponse, error) {
+	var res FlightResponse
+	var err error
+
+	delay := time.Duration(100 * time.Millisecond)
+
+	for attempt := 0; attempt < retry; attempt++ {
+		res, err = a.httpPost(ctx)
+		if err == nil {
+			return res, nil
+		}
+
+		time.Sleep(delay)
+		delay *= 2
+	}
+
+	return FlightResponse{}, err
 }
 
 func (*garuda) httpPost(ctx context.Context) (FlightResponse, error) {

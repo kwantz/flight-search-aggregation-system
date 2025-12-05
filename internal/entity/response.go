@@ -3,9 +3,8 @@ package entity
 type FlightResponse struct {
 	SearchCriteria SearchCriteria         `json:"search_criteria"`
 	Metadata       FlightResponseMetadata `json:"metadata"`
+	BestValue      Flight                 `json:"best_value"`
 	Flights        []Flight               `json:"flight"`
-
-	// Next: add departure_flights & return_flights for round-trip
 }
 
 type SearchCriteria struct {
