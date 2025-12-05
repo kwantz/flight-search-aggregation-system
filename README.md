@@ -20,6 +20,33 @@
 ```
 2. The server will return a JSON response with the aggregated flight results from multiple airlines.
 
+# Folder Structure
+
+```
+.
+├── cmd
+│   └── http
+│       └── main.go                 # main function
+├── internal                        # internal project
+│   ├── constants                   # constant variable
+│   ├── domain                      # 3rd party API's
+│   │   └── flight
+│   │       ├── airasia
+│   │       ├── batikair
+│   │       ├── garudaindonesia
+│   │       └── lionair
+│   ├── entity                      # data model
+│   ├── handler                     # http/grpc/cron handler
+│   ├── interfaces                  # interface for dependency injection
+│   ├── usecase                     # core business flow
+│   │   └── flight
+│   ├── repository                  # data access layer
+├── pkg
+├── README.md
+```
+
+
+
 # Functionality
 
 1. Aggregate Flight Data from Multiple Sources
