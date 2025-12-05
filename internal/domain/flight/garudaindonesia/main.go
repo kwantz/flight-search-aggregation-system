@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -66,7 +67,10 @@ func (*garuda) httpPost(ctx context.Context) (FlightResponse, error) {
 		return resp, err
 	}
 
-	time.Sleep(100 * time.Millisecond)
+	rand.Seed(time.Now().UnixNano())
+	sleep := time.Duration(50 + rand.Intn(50))
+	time.Sleep(sleep * time.Millisecond)
+
 	return resp, nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -60,7 +61,10 @@ func (*batikair) httpPost(ctx context.Context) (FlightResponse, error) {
 		return resp, err
 	}
 
-	time.Sleep(400 * time.Millisecond)
+	rand.Seed(time.Now().UnixNano())
+	sleep := time.Duration(200 + rand.Intn(200))
+	time.Sleep(sleep * time.Millisecond)
+
 	return resp, nil
 }
 

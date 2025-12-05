@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -72,7 +73,10 @@ func (*airasia) httpPost(ctx context.Context) (SearchResponse, error) {
 		return resp, err
 	}
 
-	time.Sleep(150 * time.Millisecond)
+	rand.Seed(time.Now().UnixNano())
+	sleep := time.Duration(50 + rand.Intn(100))
+	time.Sleep(sleep * time.Millisecond)
+
 	return resp, nil
 }
 

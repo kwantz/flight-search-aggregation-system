@@ -3,6 +3,7 @@ package flight
 import (
 	"context"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/kwantz/flight-search-aggregation-system/internal/constants"
@@ -32,27 +33,36 @@ func (u *usecase) SearchFlight(ctx context.Context, req entity.FlightRequest) (e
 	flightProviderFail := 0
 	flightProviderStartTime := time.Now()
 
-	// Improvement: change to async + wait group + lock mutex
+	var mu sync.Mutex
+	var wg sync.WaitGroup
 
 	for _, provider := range u.flightProvider {
-		flightsFromProvider, err := provider.Search(ctx)
-		if err != nil {
-			log.Printf("[ERROR][usecase/flight][SearchFlight] failed provider.Search, err: %s", err.Error())
+		wg.Add(1)
 
-			flightProviderFail++
-			continue
-		}
+		go func(wg *sync.WaitGroup, provider interfaces.IFlightProviderDomain) {
+			defer wg.Done()
 
-		flightProviderSuccess++
-		flights = append(flights, flightsFromProvider...)
+			flightsFromProvider, err := provider.Search(ctx)
+			if err != nil {
+				log.Printf("[ERROR][usecase/flight][SearchFlight] failed provider.Search, err: %s", err.Error())
+
+				mu.Lock()
+				flightProviderFail++
+				mu.Unlock()
+			} else {
+				mu.Lock()
+				flightProviderSuccess++
+				flights = append(flights, flightsFromProvider...)
+				mu.Unlock()
+			}
+		}(&wg, provider)
 	}
 
+	wg.Wait()
 	flightProviderTimeDuration := time.Since(flightProviderStartTime)
 
-	// Improvement: for better performance, move these inside async process above
-	flights = u.searchFlight(flights, req)  // move to async
-	flights = u.filterFlights(flights, req) // move to async
-
+	flights = u.searchFlight(flights, req)
+	flights = u.filterFlights(flights, req)
 	flights = u.sortFlights(flights, req)
 	flights, bestValue := u.rankFlights(flights)
 
